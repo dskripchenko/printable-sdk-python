@@ -11,7 +11,7 @@ only** — the secret key must never reach untrusted environments.
 ## Install
 
 ```bash
-pip install printable-sdk
+pip install printable-api-sdk
 ```
 
 ## Quick start

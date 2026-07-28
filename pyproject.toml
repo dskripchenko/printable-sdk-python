@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "printable-sdk"
+name = "printable-api-sdk"
 version = "1.0.0"
 description = "Official Python SDK for the Printable document-generation service: HMAC-signed integration API client (templates, print-forms, batches, drafts, webhooks)."
 readme = "README.md"
