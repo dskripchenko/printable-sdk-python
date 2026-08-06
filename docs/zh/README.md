@@ -1,22 +1,20 @@
 # Printable SDK for Python
 
-Official Python client for the Printable document-generation service
-integration API: templates, print-forms, batch rendering, document drafts
-and webhook verification — with HMAC request signing (simple and strict
-canonical modes) built in and byte-compatible with the server implementation.
+面向文档生成服务 [Printable](https://printable.dev-cloud.space) 集成 API 的官方 Python 客户端：
+模板、打印表单、批量渲染、文档草稿以及 webhook 校验。HMAC 请求签名
+（简单模式与严格规范模式）已内置，并与服务端实现逐字节一致。
 
-> 🌐 **English** · [Deutsch](docs/de/README.md) · [Русский](docs/ru/README.md) · [中文](docs/zh/README.md)
+> 🌐 [English](../../README.md) · [Deutsch](../de/README.md) · [Русский](../ru/README.md) · **中文**
 
-Zero runtime dependencies (stdlib only). Python 3.10+. **Server-side
-only** — the secret key must never reach untrusted environments.
+运行时零依赖（仅标准库）。Python 3.10+。**仅限服务端**——密钥绝不能进入不可信环境。
 
-## Install
+## 安装
 
 ```bash
 pip install printable-api-sdk
 ```
 
-## Quick start
+## 快速开始
 
 ```python
 from printable_sdk import PrintableClient
@@ -26,10 +24,10 @@ client = PrintableClient(
     token="erp-main-7f3a",
     secret_key=os.environ["PRINTABLE_SECRET"],
     salt=os.environ["PRINTABLE_SALT"],
-    strict=False,  # True if the credential has "verify full payload hash" enabled
+    strict=False,  # 若该凭据开启了“校验完整载荷哈希”，则填 True
 )
 
-# Render a document
+# 渲染一份文档
 doc = client.print_form_create({
     "template": "invoice",
     "variables": {"company": {"name": "ACME Ltd"}},
@@ -37,7 +35,7 @@ doc = client.print_form_create({
 })
 print(doc["link"])
 
-# Batch with archive + email delivery
+# 批量生成，打包并邮件送达
 batch = client.print_form_batch({
     "template": "certificate",
     "items": [{"variables": {"name": "Alice"}}, {"variables": {"name": "Bob"}}],
@@ -47,19 +45,19 @@ batch = client.print_form_batch({
 status = client.print_form_batch_get(batch["uuid"])
 ```
 
-## API surface
+## API 一览
 
 `template_list` · `template_contract` · `template_export` ·
 `template_import` · `template_import_docx` · `print_form_create` ·
 `print_form_get` · `print_form_rules` · `print_form_batch` ·
 `print_form_batch_get` · `document_draft_create` · `document_draft_get` ·
-`call(method, endpoint, params)` (escape hatch).
+`call(method, endpoint, params)`
 
-Every method returns the decoded `payload` dict of the response envelope.
-Errors (non-2xx or `success: false`) raise `PrintableError` with
-`.status`, `.error_key` and the raw error `.payload`.
+每个方法都返回响应信封中解码后的 `payload` 字典。
+出错时（非 2xx 或 `success: false`）抛出 `PrintableError`，其中带有
+`.status`、`.error_key` 以及原始的错误 `.payload`。
 
-## Webhooks
+## Webhook
 
 ```python
 valid = client.verify_webhook(
@@ -69,9 +67,9 @@ valid = client.verify_webhook(
 )
 ```
 
-## Testing your integration
+## 为集成打桩测试
 
-Inject a custom `transport` to stub HTTP:
+注入自定义的 `transport` 即可为 HTTP 打桩：
 
 ```python
 client = PrintableClient(
@@ -80,6 +78,6 @@ client = PrintableClient(
 )
 ```
 
-## License
+## 许可证
 
 MIT

@@ -1,22 +1,24 @@
-# Printable SDK for Python
+# Printable-SDK für Python
 
-Official Python client for the Printable document-generation service
-integration API: templates, print-forms, batch rendering, document drafts
-and webhook verification — with HMAC request signing (simple and strict
-canonical modes) built in and byte-compatible with the server implementation.
+Offizieller Python-Client für die Integrations-API des Dokumentendienstes
+[Printable](https://printable.dev-cloud.space): Vorlagen, Druckformulare,
+Stapelverarbeitung, Dokumententwürfe und Webhook-Prüfung. Die HMAC-Signatur der
+Anfragen (einfacher und strenger kanonischer Modus) ist eingebaut und
+byteweise identisch mit der Server-Implementierung.
 
-> 🌐 **English** · [Deutsch](docs/de/README.md) · [Русский](docs/ru/README.md) · [中文](docs/zh/README.md)
+> 🌐 [English](../../README.md) · **Deutsch** · [Русский](../ru/README.md) · [中文](../zh/README.md)
 
-Zero runtime dependencies (stdlib only). Python 3.10+. **Server-side
-only** — the secret key must never reach untrusted environments.
+Keine Laufzeitabhängigkeiten (nur die Standardbibliothek). Python 3.10+.
+**Nur serverseitig** — der geheime Schlüssel darf nie in eine nicht
+vertrauenswürdige Umgebung gelangen.
 
-## Install
+## Installation
 
 ```bash
 pip install printable-api-sdk
 ```
 
-## Quick start
+## Schnellstart
 
 ```python
 from printable_sdk import PrintableClient
@@ -26,10 +28,10 @@ client = PrintableClient(
     token="erp-main-7f3a",
     secret_key=os.environ["PRINTABLE_SECRET"],
     salt=os.environ["PRINTABLE_SALT"],
-    strict=False,  # True if the credential has "verify full payload hash" enabled
+    strict=False,  # True, wenn für den Zugang „gesamten Payload-Hash prüfen“ aktiv ist
 )
 
-# Render a document
+# Ein Dokument rendern
 doc = client.print_form_create({
     "template": "invoice",
     "variables": {"company": {"name": "ACME Ltd"}},
@@ -37,7 +39,7 @@ doc = client.print_form_create({
 })
 print(doc["link"])
 
-# Batch with archive + email delivery
+# Stapel mit Archiv und E-Mail-Versand
 batch = client.print_form_batch({
     "template": "certificate",
     "items": [{"variables": {"name": "Alice"}}, {"variables": {"name": "Bob"}}],
@@ -47,17 +49,17 @@ batch = client.print_form_batch({
 status = client.print_form_batch_get(batch["uuid"])
 ```
 
-## API surface
+## API-Oberfläche
 
 `template_list` · `template_contract` · `template_export` ·
 `template_import` · `template_import_docx` · `print_form_create` ·
 `print_form_get` · `print_form_rules` · `print_form_batch` ·
 `print_form_batch_get` · `document_draft_create` · `document_draft_get` ·
-`call(method, endpoint, params)` (escape hatch).
+`call(method, endpoint, params)`
 
-Every method returns the decoded `payload` dict of the response envelope.
-Errors (non-2xx or `success: false`) raise `PrintableError` with
-`.status`, `.error_key` and the raw error `.payload`.
+Jede Methode gibt das dekodierte `payload`-Dict aus dem Antwort-Umschlag zurück.
+Fehler (nicht-2xx oder `success: false`) lösen `PrintableError` aus — mit
+`.status`, `.error_key` und dem rohen Fehler-`.payload`.
 
 ## Webhooks
 
@@ -69,9 +71,9 @@ valid = client.verify_webhook(
 )
 ```
 
-## Testing your integration
+## Integration testen
 
-Inject a custom `transport` to stub HTTP:
+Injizieren Sie einen eigenen `transport`, um HTTP zu stubben:
 
 ```python
 client = PrintableClient(
@@ -80,6 +82,6 @@ client = PrintableClient(
 )
 ```
 
-## License
+## Lizenz
 
 MIT
