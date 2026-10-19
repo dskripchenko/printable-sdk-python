@@ -79,6 +79,21 @@ class PrintableClient:
             "docx_b64": docx_b64, "group_id": group_id, "name": name,
         }))
 
+    def template_import_xlsx(self, xlsx_b64: str, group: int | str,
+                             name: str | None = None) -> dict[str, Any]:
+        """Import an Excel workbook (.xlsx) as a template draft.
+
+        One section per non-empty sheet, printed at the sheet's own print
+        scale. ``group`` is an existing group's id, or a path
+        ("Реестры / Отчёты") the service creates when it is missing.
+        """
+        return self.call("POST", "template/import-xlsx", _clean({
+            "xlsx_b64": xlsx_b64,
+            "group_id": group if isinstance(group, int) else None,
+            "group": group if isinstance(group, str) else None,
+            "name": name,
+        }))
+
     # -- Print forms ----------------------------------------------------
 
     def print_form_create(self, params: dict[str, Any]) -> dict[str, Any]:
@@ -86,6 +101,31 @@ class PrintableClient:
 
     def print_form_get(self, uuid: str, format: str = "link") -> dict[str, Any]:
         return self.call("GET", "print-form/get", {"uuid": uuid, "format": format})
+
+    def print_form_signature_request(self, uuid: str, certificate: str,
+                                     slot: str | None = None) -> dict[str, Any]:
+        """Ask for the digest an external signer signs.
+
+        For a document in ``awaiting_signature``, with the signer's
+        certificate (PEM, or DER in base64 as CryptoPro exports it). Sign the
+        digest into a detached CMS and pass it to
+        :meth:`print_form_signature_complete` before ``expires_at``. Without
+        ``slot`` — the signature field the document waits for.
+        """
+        return self.call("POST", "print-form/signature-request", _clean({
+            "uuid": uuid, "certificate": certificate, "slot": slot,
+        }))
+
+    def print_form_signature_complete(self, uuid: str, cms: str, slot: str | None = None,
+                                      format: str = "link") -> dict[str, Any]:
+        """Hand in the external signature: the detached CMS (base64 or PEM).
+
+        The answer is the document — ``done`` when every signature is in,
+        else still ``awaiting_signature`` for the next signer.
+        """
+        return self.call("POST", "print-form/signature-complete", _clean({
+            "uuid": uuid, "cms": cms, "slot": slot, "format": format,
+        }))
 
     def print_form_rules(self, template: str, version: str | None = None) -> dict[str, Any]:
         return self.call("GET", "print-form/rules", _clean({

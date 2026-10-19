@@ -52,8 +52,10 @@ status = client.print_form_batch_get(batch["uuid"])
 ## API-Oberfläche
 
 `template_list` · `template_contract` · `template_export` ·
-`template_import` · `template_import_docx` · `print_form_create` ·
-`print_form_get` · `print_form_rules` · `print_form_batch` ·
+`template_import` · `template_import_docx` · `template_import_xlsx` ·
+`print_form_create` ·
+`print_form_get` · `print_form_rules` · `print_form_signature_request` ·
+`print_form_signature_complete` · `print_form_batch` ·
 `print_form_batch_get` · `document_draft_create` · `document_draft_get` ·
 `call(method, endpoint, params)`
 
