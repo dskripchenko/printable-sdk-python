@@ -84,3 +84,40 @@ def test_verify_webhook_accepts_prefixed_header():
     ).hexdigest()
     assert client.verify_webhook('{"uuid":"abc"}', signature, "1753600000")
     assert not client.verify_webhook('{"uuid":"abc"}', "sha256=deadbeef", "1753600000")
+
+
+def test_template_import_xlsx_takes_group_id_or_path():
+    client, captured = make_client()
+    client.template_import_xlsx("UEsDBBQ=", 7)
+    client.template_import_xlsx("UEsDBBQ=", "Реестры / Отчёты", "Отчёт")
+
+    assert captured[0]["url"] == "https://printable.test/api/integration/template/import-xlsx"
+    assert captured[0]["body"]["group_id"] == 7
+    assert "group" not in captured[0]["body"]
+    assert "name" not in captured[0]["body"]
+    assert captured[1]["body"]["group"] == "Реестры / Отчёты"
+    assert "group_id" not in captured[1]["body"]
+    assert captured[1]["body"]["name"] == "Отчёт"
+
+
+def test_signature_request_sends_certificate_and_slot_when_given():
+    client, captured = make_client()
+    client.print_form_signature_request("11111111-1111-1111-1111-111111111111", "MIIB")
+    client.print_form_signature_request("11111111-1111-1111-1111-111111111111", "MIIB", "counterparty")
+
+    assert captured[0]["method"] == "POST"
+    assert captured[0]["url"] == "https://printable.test/api/integration/print-form/signature-request"
+    assert captured[0]["body"]["certificate"] == "MIIB"
+    assert "slot" not in captured[0]["body"]
+    assert captured[1]["body"]["slot"] == "counterparty"
+
+
+def test_signature_complete_sends_cms_and_format():
+    client, captured = make_client()
+    client.print_form_signature_complete("11111111-1111-1111-1111-111111111111", "MIAG", format="b64")
+
+    assert captured[0]["url"] == "https://printable.test/api/integration/print-form/signature-complete"
+    assert captured[0]["body"]["cms"] == "MIAG"
+    assert captured[0]["body"]["format"] == "b64"
+    assert "slot" not in captured[0]["body"]
+
