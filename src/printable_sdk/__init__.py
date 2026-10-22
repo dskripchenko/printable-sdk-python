@@ -5,4 +5,4 @@ from .client import PrintableClient, PrintableError
 from .signer import Signer
 
 __all__ = ["PrintableClient", "PrintableError", "Signer", "canonicalize"]
-__version__ = "1.0.0"
+__version__ = "1.1.0"

@@ -10,6 +10,8 @@ the tagged commit history.
 
 ## [Unreleased]
 
+## [v1.1.0] - 2026-10-22
+
 ### Added
 - `print_form_signature_request()` and `print_form_signature_complete()` —
   signing a document by an external signer (a qualified signature in the
