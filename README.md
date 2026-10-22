@@ -53,13 +53,46 @@ status = client.print_form_batch_get(batch["uuid"])
 `template_import` · `template_import_docx` · `template_import_xlsx` ·
 `print_form_create` ·
 `print_form_get` · `print_form_rules` · `print_form_signature_request` ·
-`print_form_signature_complete` · `print_form_batch` ·
+`print_form_signature_complete` · `print_form_signature_invite` ·
+`print_form_batch` ·
 `print_form_batch_get` · `document_draft_create` · `document_draft_get` ·
 `call(method, endpoint, params)` (escape hatch).
 
 Every method returns the decoded `payload` dict of the response envelope.
 Errors (non-2xx or `success: false`) raise `PrintableError` with
 `.status`, `.error_key` and the raw error `.payload`.
+
+## Signing and protection
+
+`print-form/create` and `print-form/batch` accept optional parameters, passed as-is in the params:
+
+- `preset` — a print-preset code used instead of `template` (`document-draft/create` accepts it too);
+- `signing` — a signature profile per slot, a visible or invisible signature, the reason, and `recipients` — the counterparties who sign the document themselves;
+- `protection` — PDF protection: `{"generate": true}` lets the service generate the password, or pass your own one under `password`; the optional `permissions` is `read_print`, `read_only` or `forms_sign`.
+
+The response then carries a `protection` block (`protected`, `permissions`, `password`, `owner_password`). **Passwords are returned only once** — in the response that issues the document; afterwards they come back masked (`••••••••`), so store them right away. Each `signature.slots[]` item may carry `method` (`cms`, `plugin`, `pdf` or `sig`) and `signature_link` — the recipient's detached `.sig`.
+
+```python
+doc = client.print_form_create({
+    "preset": "contract-signed",
+    "variables": {"contract": {"number": 15}},
+    "signing": {
+        "slots": {"company": {"profile": "ceo"}},
+        "invisible": False,
+        "reason": "Contract 15",
+        "recipients": {"buyer": {"email": "buyer@example.com", "name": "Buyer LLC"}},
+    },
+    "protection": {"generate": True, "permissions": "read_print"},
+})
+# The password comes only in this response — store it now
+protection = doc["protection"]
+
+# Hand the link over yourself, or let the service email it
+invite = client.print_form_signature_invite(doc["uuid"], "buyer@example.com", "buyer", "Buyer LLC")
+print(invite["sign_url"])
+```
+
+`print_form_signature_invite()` invites the recipient to sign: it returns `sign_url` — a personal link to the signing page (CryptoPro browser plug-in, a detached `.sig` upload, or a PDF signed in its field) — and `expires_at`. With an email address the service also sends the link (`sent`).
 
 ## Webhooks
 

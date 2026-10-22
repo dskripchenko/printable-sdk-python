@@ -55,13 +55,46 @@ status = client.print_form_batch_get(batch["uuid"])
 `template_import` · `template_import_docx` · `template_import_xlsx` ·
 `print_form_create` ·
 `print_form_get` · `print_form_rules` · `print_form_signature_request` ·
-`print_form_signature_complete` · `print_form_batch` ·
+`print_form_signature_complete` · `print_form_signature_invite` ·
+`print_form_batch` ·
 `print_form_batch_get` · `document_draft_create` · `document_draft_get` ·
 `call(method, endpoint, params)`
 
 Jede Methode gibt das dekodierte `payload`-Dict aus dem Antwort-Umschlag zurück.
 Fehler (nicht-2xx oder `success: false`) lösen `PrintableError` aus — mit
 `.status`, `.error_key` und dem rohen Fehler-`.payload`.
+
+## Signatur und Schutz
+
+`print-form/create` und `print-form/batch` akzeptieren optionale Parameter, die unverändert in den params übergeben werden:
+
+- `preset` — der Code einer Druckvorgabe anstelle von `template` (auch `document-draft/create` akzeptiert ihn);
+- `signing` — ein Signaturprofil je Feld, eine sichtbare oder unsichtbare Signatur, der Grund und `recipients` — die Gegenparteien, die das Dokument selbst signieren;
+- `protection` — PDF-Schutz: `{"generate": true}` lässt den Dienst das Passwort erzeugen, alternativ ein eigenes im Feld `password`; das optionale `permissions` ist `read_print`, `read_only` oder `forms_sign`.
+
+Die Antwort enthält dann einen Block `protection` (`protected`, `permissions`, `password`, `owner_password`). **Passwörter werden nur einmal geliefert** — in der Antwort, die das Dokument ausstellt; danach kommen sie maskiert (`••••••••`), also sofort speichern. Jedes Element von `signature.slots[]` kann `method` (`cms`, `plugin`, `pdf` oder `sig`) und `signature_link` tragen — die abgetrennte `.sig` des Empfängers.
+
+```python
+doc = client.print_form_create({
+    "preset": "contract-signed",
+    "variables": {"contract": {"number": 15}},
+    "signing": {
+        "slots": {"company": {"profile": "ceo"}},
+        "invisible": False,
+        "reason": "Contract 15",
+        "recipients": {"buyer": {"email": "buyer@example.com", "name": "Buyer LLC"}},
+    },
+    "protection": {"generate": True, "permissions": "read_print"},
+})
+# Das Passwort kommt nur in dieser Antwort — jetzt speichern
+protection = doc["protection"]
+
+# Den Link selbst weitergeben oder vom Dienst per E-Mail senden lassen
+invite = client.print_form_signature_invite(doc["uuid"], "buyer@example.com", "buyer", "Buyer LLC")
+print(invite["sign_url"])
+```
+
+`print_form_signature_invite()` lädt den Empfänger zur Signatur ein: Es liefert `sign_url` — einen persönlichen Link zur Signaturseite (CryptoPro-Browser-Plug-in, Upload einer abgetrennten `.sig` oder ein im eigenen Feld signiertes PDF) — und `expires_at`. Mit einer E-Mail-Adresse verschickt der Dienst den Link auch per E-Mail (`sent`).
 
 ## Webhooks
 
