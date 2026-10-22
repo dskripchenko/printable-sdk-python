@@ -121,3 +121,19 @@ def test_signature_complete_sends_cms_and_format():
     assert captured[0]["body"]["format"] == "b64"
     assert "slot" not in captured[0]["body"]
 
+
+def test_signature_invite_sends_email_and_name_skipping_unset():
+    client, captured = make_client()
+    client.print_form_signature_invite("11111111-1111-1111-1111-111111111111")
+    client.print_form_signature_invite("11111111-1111-1111-1111-111111111111",
+                                       "buyer@example.com", "buyer", "Buyer LLC")
+
+    assert captured[0]["method"] == "POST"
+    assert captured[0]["url"] == "https://printable.test/api/integration/print-form/signature-invite"
+    assert captured[0]["body"]["uuid"] == "11111111-1111-1111-1111-111111111111"
+    assert "email" not in captured[0]["body"]
+    assert "slot" not in captured[0]["body"]
+    assert "name" not in captured[0]["body"]
+    assert captured[1]["body"]["email"] == "buyer@example.com"
+    assert captured[1]["body"]["slot"] == "buyer"
+    assert captured[1]["body"]["name"] == "Buyer LLC"

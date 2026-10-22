@@ -127,6 +127,21 @@ class PrintableClient:
             "uuid": uuid, "cms": cms, "slot": slot, "format": format,
         }))
 
+    def print_form_signature_invite(self, uuid: str, email: str | None = None,
+                                    slot: str | None = None,
+                                    name: str | None = None) -> dict[str, Any]:
+        """Invite the document's recipient to sign it themselves.
+
+        The service issues a personal link to a signing page (CryptoPro
+        browser plug-in, a detached .sig upload, or a PDF signed in its
+        field). With ``email`` the service also sends the link by email.
+        Without ``slot`` — the signature field the document waits for.
+        Returns ``uuid``, ``slot``, ``sign_url``, ``expires_at``, ``sent``.
+        """
+        return self.call("POST", "print-form/signature-invite", _clean({
+            "uuid": uuid, "slot": slot, "email": email, "name": name,
+        }))
+
     def print_form_rules(self, template: str, version: str | None = None) -> dict[str, Any]:
         return self.call("GET", "print-form/rules", _clean({
             "template": template, "version": version,

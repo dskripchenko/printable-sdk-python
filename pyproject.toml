@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "printable-api-sdk"
-version = "1.0.0"
+version = "1.1.0"
 description = "Official Python SDK for the Printable document-generation service: HMAC-signed integration API client (templates, print-forms, batches, drafts, webhooks)."
 readme = "README.md"
 license = "MIT"
